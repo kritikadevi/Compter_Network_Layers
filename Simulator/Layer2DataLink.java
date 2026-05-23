@@ -23,6 +23,42 @@ public class Layer2DataLink {
     }
 }
 
+class Bridge {
+    public String name;
+    public List<EndDevice> sideA = new ArrayList<>();
+    public List<EndDevice> sideB = new ArrayList<>();
+    public Map<String, String> macSide = new LinkedHashMap<>();
+
+    public Bridge(String name) {
+        this.name = name;
+    }
+
+    public void attachA(EndDevice device) {
+        sideA.add(device);
+        device.connectedBridges.add(this);
+    }
+
+    public void attachB(EndDevice device) {
+        sideB.add(device);
+        device.connectedBridges.add(this);
+    }
+
+    public void forward(Layer2DataLink frame, EndDevice sender) {
+        String inSide = sideA.contains(sender) ? "A" : "B";
+        macSide.put(frame.srcMAC, inSide);
+        String outSide = macSide.get(frame.dstMAC);
+
+        System.out.println("  [L2 - BRIDGE / " + name + "] Learned " + frame.srcMAC + " on segment " + inSide);
+        if (outSide == null) {
+            System.out.println("  [L2 - BRIDGE / " + name + "] Unknown destination, flooding to opposite segment.");
+        } else if (outSide.equals(inSide)) {
+            System.out.println("  [L2 - BRIDGE / " + name + "] Same segment traffic, filtering frame.");
+        } else {
+            System.out.println("  [L2 - BRIDGE / " + name + "] Forwarding frame from segment " + inSide + " to " + outSide);
+        }
+    }
+}
+
 class NetworkSwitch {
     public String switchName;
     public Map<String, EndDevice> macTable = new LinkedHashMap<>();
@@ -36,16 +72,21 @@ class NetworkSwitch {
     }
 
     public void switchForward(Layer2DataLink frame, EndDevice senderNode) {
-        if (!macTable.containsKey(frame.srcMAC)) {
-            macTable.put(frame.srcMAC, senderNode);
-            System.out.println("  [L2 - SWITCH / " + switchName + "] Learning: MAC " + frame.srcMAC + " mapped to port [" + senderNode.name + "]");
-        }
+        macTable.put(frame.srcMAC, senderNode);
+        System.out.println("  [L2 - SWITCH / " + switchName + "] Learning: MAC " + frame.srcMAC + " mapped to port [" + senderNode.name + "]");
 
         EndDevice lookupPort = macTable.get(frame.dstMAC);
         if (lookupPort != null) {
             System.out.println("  [L2 - SWITCH / " + switchName + "] Decision: UNICAST frame directly to " + lookupPort.name);
         } else {
             System.out.println("  [L2 - SWITCH / " + switchName + "] Unknown MAC: FLOODING frame out to all alternate ports.");
+        }
+    }
+
+    public void printMacTable() {
+        System.out.println("  [L2 - SWITCH / " + switchName + "] MAC Address Table");
+        for (Map.Entry<String, EndDevice> entry : macTable.entrySet()) {
+            System.out.println("    " + entry.getKey() + " -> " + entry.getValue().name);
         }
     }
 }

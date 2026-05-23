@@ -19,7 +19,7 @@ public class Layer4Transport {
 
     public static void executeTcpHandshake(String sIP, int sPort, String dIP, int dPort) {
         System.out.println("  [L4 - TRANSPORT]   --- TCP 3-Way Handshake Connection SETUP ---");
-        System.out.println("  [L4 - TRANSPORT]     [SYN]      " + sIP + ":" + sPort + " ──> " + dIP + ":" + dPort);
+        System.out.println("  [L4 - TRANSPORT]     [SYN]      " + sIP + ":" + sPort + " --> " + dIP + ":" + dPort);
         System.out.println("  [L4 - TRANSPORT]     [SYN-ACK]  Target host acknowledges synchronization maps.");
         System.out.println("  [L4 - TRANSPORT]     [ACK]      Channel connection state changed to ESTABLISHED.");
     }
