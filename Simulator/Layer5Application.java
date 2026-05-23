@@ -123,6 +123,7 @@ class EndDevice {
                     } else {
                         System.out.println("  [L2 - DATA LINK]     -> Frame Verification Success: Parity validation clear.");
                         sent = true;
+                        learnReceiverOnSharedSwitch(receiver);
                         deliverPacket(receiver, packet, nextHopMAC);
                     }
                 } else {
@@ -142,6 +143,14 @@ class EndDevice {
             }
         }
         receiver.receiveAndDecodeNetworkStack(packet);
+    }
+
+    private void learnReceiverOnSharedSwitch(EndDevice receiver) {
+        for (NetworkSwitch netSwitch : connectedSwitches) {
+            if (receiver.connectedSwitches.contains(netSwitch)) {
+                netSwitch.learnDevice(receiver);
+            }
+        }
     }
 
     // Bottom-Up Decapsulation Engine

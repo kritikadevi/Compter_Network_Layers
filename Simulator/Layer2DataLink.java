@@ -72,14 +72,20 @@ class NetworkSwitch {
     }
 
     public void switchForward(Layer2DataLink frame, EndDevice senderNode) {
-        macTable.put(frame.srcMAC, senderNode);
-        System.out.println("  [L2 - SWITCH / " + switchName + "] Learning: MAC " + frame.srcMAC + " mapped to port [" + senderNode.name + "]");
+        learnDevice(senderNode);
 
         EndDevice lookupPort = macTable.get(frame.dstMAC);
         if (lookupPort != null) {
             System.out.println("  [L2 - SWITCH / " + switchName + "] Decision: UNICAST frame directly to " + lookupPort.name);
         } else {
             System.out.println("  [L2 - SWITCH / " + switchName + "] Unknown MAC: FLOODING frame out to all alternate ports.");
+        }
+    }
+
+    public void learnDevice(EndDevice device) {
+        EndDevice oldPort = macTable.put(device.macAddress, device);
+        if (oldPort == null) {
+            System.out.println("  [L2 - SWITCH / " + switchName + "] Learning: MAC " + device.macAddress + " mapped to port [" + device.name + "]");
         }
     }
 
