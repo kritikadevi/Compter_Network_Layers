@@ -1,0 +1,64 @@
+COMPUTER NETWORKS
+5- LAYER NETWORK SIMULATOR
+
+-OVERVIEW: This program is a Java-based simulator that teaches how data travels across a computer network. It walks through all 5 layers of the network model — from the application you use (like a browser) all the way down to the physical bits being transmitted. The user picks a network layout and two devices, then the simulator shows how a message gets packaged and sent between them.
+
+-NETWORK TOPOLOGIES SUPPORTED: 
+1. Direct Topology: Devices are linked directly to each other, one after another (like a chain). The program creates 2 or more PCs, assigns them IPs in the 192.168.1.x range, and connects them in a line. There is 1 broadcast domain and the number of collision domains equals the number of cable links.
+2. Hub Topology: A Hub is a simple device that just shouts any incoming signal to all ports. There is no intelligence — everyone hears everything. The program creates a Hub object, attaches all PCs to it, and notes there is only 1 collision domain because all traffic competes on the same wire.
+3. Switch Topology: A Switch is smarter than a hub. It learns which device is on which port by reading MAC addresses, and only sends traffic to the correct destination. Each device gets its own collision domain. After sending a message, the program prints the switch MAC address table to show what it learned.
+4. Router Topology: This is the most complex topology. Two separate LANs (Local Area Networks) are connected by one or more routers. Each LAN has its own switch and IP address range. Routers are given interfaces, static routes, and even RIP and OSPF routing protocol simulations. There are 2 broadcast domains.
+
+This simulator is built around the 5-layer TCP/IP model. Every time a message is sent, it passes through all five layers on the sender s side, travels across the network, and then passes back up through all five layers on the receiver s side. Here is what each layer means and what this simulator includes at each one:
+
+LAYER 5: APPLICATION LAYER
+This is the top layer — the one closest to the actual user. It is where software applications create and interpret messages. When you open a browser and visit a website, or transfer a file, or look up a domain name, that all happens at this layer.
+
+In this simulator, Layer 5 is represented by the Layer5Application class. The simulator supports three application protocols:
+•	HTTP (HyperText Transfer Protocol) — used to send and receive web pages. The simulator calls constructHTTPTraffic() to build an HTTP message.
+•	FTP (File Transfer Protocol) — used to upload or download files. The simulator calls constructFTPTraffic() with a command like GET and the filename.
+•	DNS (Domain Name System) — used to look up which IP address belongs to a domain name (like google.com). The simulator calls constructDNSTraffic() with the domain to look up.
+
+The application layer data is then handed down to Layer 4 for transport.
+
+LAYER 4: TRANSPORT LAYER                                                                                                                                                                                       
+The transport layer is responsible for breaking data into smaller chunks (called segments) and making sure they all arrive correctly at the destination. It also manages ports — numbers that identify which application on a device should receive the data (for example, port 80 for HTTP, port 21 for FTP, port 53 for DNS).
+
+The two main protocols at this layer are:
+•	TCP (Transmission Control Protocol) — reliable, checks that every segment arrives and asks for re-sends if something is lost. Used by HTTP and FTP.
+•	UDP (User Datagram Protocol) — faster but not guaranteed. Used by DNS since speed matters more than reliability for quick lookups.
+
+In this simulator, the transport layer wraps the application message with port information and protocol type (TCP or UDP) and passes it down to Layer 3.
+
+
+LAYER 3: NETWORK LAYER
+The network layer is responsible for routing — deciding which path a packet should take to get from the source to the destination, even if they are on completely different networks. This layer uses IP addresses to identify devices.
+
+In this simulator, Layer 3 includes:
+•	IP Addresses — every device is assigned an IP address. These are used to identify the source and destination of every packet.
+•	Subnet Masks — every device has a mask, which defines which part of the IP address is the network and which part is the device.
+•	Default Gateways — in the router topology, each device is told to send traffic to a router if the destination is outside its local network. This is set by setGateway().
+•	Routers — Router objects operate at this layer. They hold routing tables and use them to forward packets toward the correct network.
+•	Static Routes — manually added routes that tell a router exactly where to send traffic for a given IP range.
+•	RIP (Routing Information Protocol) — routers share their routing tables with neighbors using distributeRipMessages(), so they all learn how to reach every network.
+
+                                                                                                                                                                                                                                                              
+LAYER 2: DATA LINK LAYER
+The data link layer handles communication between two directly connected devices. While the network layer uses IP addresses to route across networks, the data link layer uses MAC addresses to deliver a frame to the next physical device on the path.
+
+In this simulator, Layer 2 includes:
+•	MAC Addresses — every device has a hardware address. These are used to address frames within a local network.
+•	Frames — the data unit at this layer. A frame wraps the Layer 3 packet and adds source and destination MAC addresses.
+•	Hub — a Layer 2 device that has no intelligence. It receives a signal on one port and sends it out to every other port, flooding the network. It does not read MAC addresses.
+•	Switch (NetworkSwitch) — a smarter Layer 2 device. It learns which MAC address is on which port and only forwards frames to the correct destination. After each message is sent, the simulator prints the MAC address table showing what the switch learned.
+
+                                                                                                                                                                                                                                                              
+LAYER 1: PHYSICAL LAYER
+The physical layer is the bottom layer — it deals with the actual transmission of raw bits (0s and 1s) over a physical medium such as a copper cable, fibre optic cable, or wireless signal. It has no understanding of addresses or data — it just transmits electrical signals, light pulses, or radio waves.
+
+In this simulator, Layer 1 is represented by the direct connections between devices:
+•	Direct Links — in the direct topology, devices are connected to each other using linkDirectDevice(), which represents a physical cable between two machines.
+•	Port connections on Hub, Switch, and Bridge — when a device is attached to one of these with attachDevice() or attachA()/attachB(), it represents plugging a physical cable into a port.
+•	Collision Domains — a concept that comes from Layer 1. When multiple devices share the same physical wire (like in a hub), their signals can collide. The simulator reports the number of collision domains for each topology, which is directly tied to the physical layout.
+                                                                                                                                                                                                                                                          
+                                                                                                                                                                               
